@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Busca de passagens: CVC + Decolar
 
-## Getting Started
-
-First, run the development server:
+Faça uma busca só (origem, destino, datas, passageiros) e abra os resultados nos dois sites.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev   # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Como funciona
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+CVC e Decolar não têm API pública de busca e bloqueiam acesso automatizado (HTTP 403),
+então o site **não raspa** as páginas delas. Ele gera links diretos de busca:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Decolar**: abre os resultados já preenchidos
+  (`/shop/flights/results/roundtrip/ORIGEM/DESTINO/IDA/VOLTA/adultos/criancas/bebes`).
+- **CVC**: abre os resultados já preenchidos
+  (`/passagens/v3/busca/ORIGEM/DESTINO?dates=IDA&dates=VOLTA&cabin=economy`).
+  O formato não é documentado; se a CVC mudar, copie a URL de um resultado em cvc.com.br
+  e ajuste `buildUrl` em `src/lib/providers.ts`.
 
-## Learn More
+Para mostrar preços dentro do site, use uma API oficial (programa de afiliados das agências,
+ou APIs de voos como Amadeus/Duffel) e adicione um provider em `src/lib/providers.ts`.
 
-To learn more about Next.js, take a look at the following resources:
+## Observações
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `overrides.magic-string = 0.30.17` no `package.json` faz o Tailwind 4 funcionar no Node 22.5.
+  Atualizando para Node ≥ 22.12, esse override pode ser removido.
+- Cidades e aeroportos ficam em `src/lib/airports.ts`. Também dá para digitar qualquer código IATA.
