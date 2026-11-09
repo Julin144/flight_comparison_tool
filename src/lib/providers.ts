@@ -1,3 +1,12 @@
+import { placeLabel } from "./airports";
+
+/** "São Paulo (todos)" -> "São Paulo - Todos aeroportos (SAO)", como a CVC exibe. */
+function cvcPlaceName(code: string): string {
+  const label = placeLabel(code);
+  if (label === code) return code;
+  return `${label.replace(/\s*\(todos\)$/, " - Todos aeroportos")} (${code})`;
+}
+
 export type FlightSearch = {
   origin: string; // IATA
   destination: string; // IATA
@@ -45,15 +54,25 @@ export const PROVIDERS: Provider[] = [
     color: "#ffcc00",
     textColor: "#1e293b",
     // Formato não documentado, copiado da URL de resultados do site da CVC.
-    // Ex.: /passagens/v3/busca/SSA/GIG?dates=2027-02-12&dates=2027-02-19&cabin=economy
-    // Um "dates" para a ida e outro para a volta. A URL de exemplo não tinha passageiros.
+    // Ex.: /passagens/v2/search/SAO/BSB?fType=roundtrip&CLA=all&ADT=3&CHD=0&INF=0
+    //   &MCO1=São+Paulo+-+Todos+aeroportos+(SAO)&MCD1=Brasília+(BSB)
+    //   &Date1=2026-12-07&STO=PACKAGE&Date2=2027-01-29
+    // MCO1/MCD1 são os nomes exibidos na busca; Date2 só existe em ida e volta.
     prefilled: true,
     buildUrl: (s) => {
-      const params = new URLSearchParams();
-      params.append("dates", s.departure);
-      if (s.returnDate) params.append("dates", s.returnDate);
-      params.set("cabin", "economy");
-      return `https://www.cvc.com.br/passagens/v2/busca/${s.origin}/${s.destination}?${params}`;
+      const params = new URLSearchParams({
+        fType: s.returnDate ? "roundtrip" : "oneway",
+        CLA: "all",
+        ADT: String(s.adults),
+        CHD: String(s.children),
+        INF: String(s.infants),
+        MCO1: cvcPlaceName(s.origin),
+        MCD1: cvcPlaceName(s.destination),
+        Date1: s.departure,
+        STO: "PACKAGE",
+      });
+      if (s.returnDate) params.set("Date2", s.returnDate);
+      return `https://www.cvc.com.br/passagens/v2/search/${s.origin}/${s.destination}?${params}`;
     },
   },
 ];
