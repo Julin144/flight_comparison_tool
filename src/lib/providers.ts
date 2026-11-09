@@ -53,7 +53,7 @@ export const PROVIDERS: Provider[] = [
       params.append("dates", s.departure);
       if (s.returnDate) params.append("dates", s.returnDate);
       params.set("cabin", "economy");
-      return `https://www.cvc.com.br/passagens/v3/busca/${s.origin}/${s.destination}?${params}`;
+      return `https://www.cvc.com.br/passagens/v2/busca/${s.origin}/${s.destination}?${params}`;
     },
   },
 ];
